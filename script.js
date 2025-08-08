@@ -1,0 +1,256 @@
+const canvas = document.getElementById('certificateCanvas');
+const ctx = canvas.getContext('2d');
+
+let tanda1Image = null;
+let tanda2Image = null;
+
+function loadSignature(signatureNumber) {
+  const fileInput = document.getElementById(`signature${signatureNumber}`);
+  const preview = document.getElementById(`preview${signatureNumber}`);
+  const file = fileInput.files[0];
+  
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        if (signatureNumber === 1) {
+          tanda1Image = img;
+        } else {
+          tanda2Image = img;
+        }
+        
+        preview.innerHTML = `<img src="${e.target.result}" alt="Signature ${signatureNumber}">`;
+        generateCertificate();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function drawGeometricBackground() {
+  ctx.save();
+  ctx.fillStyle = '#4a4a4a';
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(300, 0);
+  ctx.lineTo(150, 200);
+  ctx.lineTo(0, 150);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(1200, 0);
+  ctx.lineTo(900, 0);
+  ctx.lineTo(1050, 200);
+  ctx.lineTo(1200, 150);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(1200, 800);
+  ctx.lineTo(900, 800);
+  ctx.lineTo(1050, 600);
+  ctx.lineTo(1200, 650);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 800);
+  ctx.lineTo(300, 800);
+  ctx.lineTo(150, 600);
+  ctx.lineTo(0, 650);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function drawDots(x, y, rows, cols, size = 3, spacing = 15) {
+  ctx.save();
+  ctx.fillStyle = '#333';
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      ctx.beginPath();
+      ctx.arc(x + j * spacing, y + i * spacing, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawBorders() {
+  ctx.save();
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(40, 40, 1120, 720);
+  
+  ctx.strokeStyle = '#f4e7b7';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(50, 50, 1100, 700);
+  ctx.restore();
+}
+
+function drawSeal() {
+  const centerX = 1050;
+  const centerY = 150;
+  const radius = 40;
+  
+  ctx.save();
+  ctx.fillStyle = '#d4af37';
+  ctx.beginPath();
+  
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI * 2) / 12;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    
+    const innerAngle = ((i + 0.5) * Math.PI * 2) / 12;
+    const innerX = centerX + Math.cos(innerAngle) * (radius * 0.7);
+    const innerY = centerY + Math.sin(innerAngle) * (radius * 0.7);
+    ctx.lineTo(innerX, innerY);
+  }
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.fillStyle = '#b8941f';
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+  ctx.fill();
+  
+  const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 25);
+  gradient.addColorStop(0, '#f4e7b7');
+  gradient.addColorStop(1, '#d4af37');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  ctx.fillStyle = '#d4af37';
+  ctx.fillRect(centerX - 2, centerY + 40, 4, 30);
+  ctx.beginPath();
+  ctx.moveTo(centerX - 10, centerY + 70);
+  ctx.lineTo(centerX + 10, centerY + 70);
+  ctx.lineTo(centerX + 5, centerY + 85);
+  ctx.lineTo(centerX - 5, centerY + 85);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function wrapText(text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let lines = [];
+  
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    
+    if (testWidth > maxWidth && n > 0) {
+      lines.push(line);
+      line = words[n] + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, startY + (i * lineHeight));
+  }
+}
+
+async function generateCertificate() {
+  const recipientName = document.getElementById('recipientName').value || 'HerzaNgt';
+  const achievementText = document.getElementById('achievementText').value || 'Sertifikat penghargaan ini dengan bangga kami berikan kepada';
+  const eventDetails = document.getElementById('eventDetails').value || 'Atas pencapaiannya menjadi DEV Pterodactil Panel yang diselenggarakan oleh Studio Mengoding Forum Kodingan pada 22 Februari 2025';
+  
+  ctx.fillStyle = '#f8f8f8';
+  ctx.fillRect(0, 0, 1200, 800);
+  
+  drawGeometricBackground();
+  drawDots(100, 120, 8, 5);
+  drawDots(950, 550, 8, 8);
+  drawBorders();
+  drawSeal();
+  
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 48px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('SERTIFIKAT', 600, 150);
+  
+  ctx.font = '24px Arial';
+  ctx.fillText('PENGHARGAAN', 600, 180);
+  
+  ctx.font = '18px Arial';
+  ctx.textAlign = 'center';
+  wrapText(achievementText, 600, 250, 800, 25);
+  
+  ctx.fillStyle = '#333';
+  ctx.font = '64px "Allura", cursive';
+  ctx.textAlign = 'center';
+  ctx.fillText(recipientName, 600, 350);
+  
+  ctx.font = '18px Arial';
+  ctx.textAlign = 'center';
+  wrapText(eventDetails, 600, 450, 800, 25);
+  
+  const signatureY = 600;
+  const leftSignX = 350;
+  const rightSignX = 850;
+  const maxSignatureWidth = 280;
+  const maxSignatureHeight = 120;
+  
+  if (tanda1Image) {
+    const ratio1 = Math.min(maxSignatureWidth / tanda1Image.width, maxSignatureHeight / tanda1Image.height);
+    const width1 = tanda1Image.width * ratio1;
+    const height1 = tanda1Image.height * ratio1;
+    ctx.drawImage(tanda1Image, leftSignX - (width1 / 2), signatureY - 50, width1, height1);
+  }
+  if (tanda2Image) {
+    const ratio2 = Math.min(maxSignatureWidth / tanda2Image.width, maxSignatureHeight / tanda2Image.height);
+    const width2 = tanda2Image.width * ratio2;
+    const height2 = tanda2Image.height * ratio2;
+    ctx.drawImage(tanda2Image, rightSignX - (width2 / 2), signatureY - 50, width2, height2);
+  }
+  
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(leftSignX - 80, signatureY + 20);
+  ctx.lineTo(leftSignX + 80, signatureY + 20);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(rightSignX - 80, signatureY + 20);
+  ctx.lineTo(rightSignX + 80, signatureY + 20);
+  ctx.stroke();
+  
+  const signerName1 = document.getElementById('signerName1').value || 'JB ZXXTZ.S.ADP.Pt';
+  const signerTitle1 = document.getElementById('signerTitle1').value || 'Owner Panel';
+  const signerName2 = document.getElementById('signerName2').value || 'JB DO.PANEL.S.P';
+  const signerTitle2 = document.getElementById('signerTitle2').value || 'Founder panel';
+  
+  ctx.fillStyle = '#333';
+  ctx.font = '14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(signerName1, leftSignX, signatureY + 40);
+  ctx.fillText(signerTitle1, leftSignX, signatureY + 60);
+  
+  ctx.fillText(signerName2, rightSignX, signatureY + 40);
+  ctx.fillText(signerTitle2, rightSignX, signatureY + 60);
+}
+
+function downloadCertificate() {
+  const link = document.createElement('a');
+  link.download = 'certificate.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+generateCertificate();
