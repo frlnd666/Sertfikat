@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sertifikat Generator</h1>
+        
+        <div class="controls">
+            <input type="text" id="recipientName" placeholder="Recipient Name" value="Nama Anda">
+            <textarea id="achievementText" placeholder="Achievement Text">Sertifikat penghargaan ini dengan bangga kami berikan kepada</textarea>
+            <textarea id="eventDetails" placeholder="Event Details">Atas partisipasinya...... yang diselenggarakan oleh ........ pada .. ....... 2025</textarea>
+            
+            <div class="signature-upload">
+                <div class="signature-box">
+                    <label>Tanda Tangan Kiri:</label>
+                    <input type="file" id="signature1" accept="image/png,image/jpg,image/jpeg" onchange="loadSignature(1)">
+                    <div class="signature-preview" id="preview1">Preview 1</div>
+                    <input type="text" id="signerName1" placeholder="Nama Penandatangan" value="Dr. Admin. SE" style="margin-top: 10px;">
+                    <input type="text" id="signerTitle1" placeholder="Jabatan" value="Owner Panel">
+                </div>
+                <div class="signature-box">
+                    <label>Tanda Tangan Kanan:</label>
+                    <input type="file" id="signature2" accept="image/png,image/jpg,image/jpeg" onchange="loadSignature(2)">
+                    <div class="signature-preview" id="preview2">Preview 2</div>
+                    <input type="text" id="signerName2" placeholder="Nama Penandatangan" value="Prof.Panelis.SH" style="margin-top: 10px;">
+                    <input type="text" id="signerTitle2" placeholder="Jabatan" value="Founder panel">
+                </div>
+            </div>
+            
+            <button onclick="generateCertificate()">Generate Certificate</button>
+            <button onclick="downloadCertificate()" class="download-btn">Download PNG</button>
+        </div>
+        
+        <canvas id="certificateCanvas" width="1200" height="800"></canvas>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
